@@ -33,6 +33,13 @@ Mysore Palace,Mysuru,12.305,76.655,India,Palace,"ಸಾವಿರಾರು ದೀ
 - `LICENSE` — Creative Commons Attribution 4.0
 - `README.md` — This file
 
+## Data Statistics
+- **Records:** 2,001 query-landmark pairs
+- **Languages:** 82 (including 11 Indian vernaculars)
+- **Countries:** 135
+- **Mean Confidence Score:** 0.91 (σ = 0.073)
+- **Coordinate Validation:** Median error = 1.10 km
+
 
 
 ## License
