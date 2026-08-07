@@ -27,18 +27,19 @@ Charminar,Hyderabad,17.361389,78.474444,India,Monument,"चार ऊँची �
 Mysore Palace,Mysuru,12.305,76.655,India,Palace,"ಸಾವಿರಾರು ದೀಪಗಳಿಂದ ಅಲಂಕರಿಸಲ್ಪಡುವ ಭವ್ಯ ಅರಮನೆ",Kannada,"Indo-Saracenic architecture, illuminated with thousands of lights during Dasara",0.85,Asia,"Chamundi Hills, St. Philomena's Cathedral, Mysore Zoo","This royal palace represents the rich heritage and cultural legacy of South India..."
 ```
 
-## Files in Repository
-
-- `GEOQUERYCA_DATASET_V1.0.csv` — Main dataset (2,001 records)
-- `LICENSE` — Creative Commons Attribution 4.0
-- `README.md` — This file
-
 ## Data Statistics
 - **Records:** 2,001 query-landmark pairs
 - **Languages:** 82 (including 11 Indian vernaculars)
 - **Countries:** 135
 - **Mean Confidence Score:** 0.91 (σ = 0.073)
 - **Coordinate Validation:** Median error = 1.10 km
+  
+## Files in Repository
+
+- `GEOQUERYCA_DATASET_V1.0.csv` — Main dataset (2,001 records)
+- `LICENSE` — Creative Commons Attribution 4.0
+- `README.md` — This file
+
 
 
 
