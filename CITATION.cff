@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "If you use this software or dataset, please cite it as below."
+title: "GeoQueryCA: A Multilingual Benchmark for Cross-Lingual Geographic Query Retrieval"
+authors:
+  - family-names: "Sahoo"
+    given-names: "Madhusmita"
+    affiliation: "Manipal Academy of Higher Education (MAHE)"
+  - family-names: "Ramakrishna"
+    given-names: "M."
+    affiliation: "Manipal Academy of Higher Education (MAHE)"
+  - family-names: "Banerjee"
+    given-names: "Tanvi"
+    affiliation: "Wright State University"
+version: 1.0.0
+date-released: 2026-08-18
+license: "MIT"
+repository-code: "https://github.com/Geotagging-Research/GeoQueryCA"
+keywords:
+  - geotagging
+  - information retrieval
+  - multilingual NLP
+  - cross-lingual retrieval
+  - benchmark dataset
+preferred-citation:
+  type: article
+  title: "GeoQueryCA: A Multilingual Benchmark for Cross-Lingual Geographic Query Retrieval"
+  authors:
+    - family-names: "Sahoo"
+      given-names: "Madhusmita"
+    - family-names: "Ramakrishna"
+      given-names: "M."
+    - family-names: "Banerjee"
+      given-names: "Tanvi"
+  journal: "Language Resources and Evaluation"
+  year: 2026
