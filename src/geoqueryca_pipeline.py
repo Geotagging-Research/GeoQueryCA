@@ -1,14 +1,14 @@
 """
 GeoQueryCA — End-to-End Pipeline
 ================================
-Single script. Two phases. Every value computed from the CSV.
+Single script. Every value computed from the CSV.
 
   PHASE 1 — Dataset profiling
       Data quality, diversity (entropy/Gini), geographic, language, category,
       and confidence-score statistics; six descriptive figures; JSON + MD.
 
   PHASE 2 — Zero-shot retrieval benchmark (publication-grade)
-      Four baselines (BM25, mBERT, XLM-R, LaBSE).
+      Six models (BM25, mBERT, XLM-R, LaBSE, mE5-large, BGE-M3).
       Six metrics (MRR, nDCG@{5,10}, Recall@{1,5,10}) with bootstrap 95% CIs.
       Paired-bootstrap significance tests + Holm–Bonferroni correction.
       Cross-lingual breakdown (in-pool & global) and per-language metrics.
@@ -314,6 +314,8 @@ def _find_csv():
         # Check whether the file was already uploaded in a previous cell/run
         # so the user is not forced to re-upload on every execution.
         _KNOWN_NAMES = [
+            "GEOQUERYCA_DATASET_V1.0.csv",
+            "data/GEOQUERYCA_DATASET_V1.0.csv",
             "GEOQUERYCA_JUNE.csv",
             "GEOQUERYCA_DATASET_Publish.csv",
         ]
@@ -352,6 +354,9 @@ def _find_csv():
 
     # ── 2. Local / non-Colab fallback ────────────────────────────────────
     for p in [
+        "data/GEOQUERYCA_DATASET_V1.0.csv",        # public release layout
+        "../data/GEOQUERYCA_DATASET_V1.0.csv",     # when run from src/
+        "GEOQUERYCA_DATASET_V1.0.csv",
         "GEOQUERYCA_JUNE.csv",
         "GEOQUERYCA_DATASET_Publish.csv",
         "/mnt/user-data/uploads/GEOQUERYCA_JUNE.csv",
@@ -363,7 +368,7 @@ def _find_csv():
     raise FileNotFoundError(
         "CSV not found. Options:\n"
         "  • In Colab  : run this script and use the upload widget.\n"
-        "  • Locally   : place GEOQUERYCA_JUNE.csv next to this script."
+        "  • Locally   : run from the repository root (data/GEOQUERYCA_DATASET_V1.0.csv)."
     )
 
 CSV_PATH = _find_csv()
@@ -461,6 +466,12 @@ print(f"Loaded {CSV_PATH}  "
 # Different versions of the CSV use different column names for the same fields.
 # Normalise to the canonical names expected by the rest of the pipeline.
 _COL_ALIASES = {
+    # The public v1.0 release names the landmark column "Landmark". It must map
+    # to "Monument" so that the Phase-3 train/test split groups records by
+    # landmark (as in the paper: 1,407 train / 591 test). Without this alias the
+    # split silently falls back to grouping by passage text (1,404 / 597).
+    "Landmark":           "Monument",
+    "landmark":           "Monument",
     "Point_of_Interest":  "Monument",
     "point_of_interest":  "Monument",
     "POI":                "Monument",
@@ -3246,7 +3257,7 @@ if CONFIG["run_benchmark"]:
     `Cultural_Significance` passage from N candidates. Exactly one passage is
     relevant per query (the row-matched ground truth), so:
     - **MRR** ≡ **MAP**
-    - **Recall@k** ≡ **HitRate@k** ≡ **GeoAcc@k**
+    - **Recall@k** ≡ **HitRate@k**
     - **nDCG@k** = E[1{{rank ≤ k}} / log₂(rank + 1)]  with IDCG = 1
 
     ## Models (see Table 2)
@@ -3290,7 +3301,7 @@ if CONFIG["run_benchmark"]:
     (the `Cultural_Significance` field of the same row). Under this
     simplification, several IR metrics collapse to equivalents — MRR is
     identical to Mean Average Precision (MAP), and Recall@k is identical to
-    HitRate@k and to the dataset's own GeoAcc@k naming. This setup mirrors
+    HitRate@k. This setup mirrors
     standard *passage retrieval* benchmarks such as Natural Questions and
     MS MARCO passage in their single-positive variants. We adopt it because:
     (i) each monument has a canonical cultural-significance description, so
@@ -3344,8 +3355,9 @@ if CONFIG["run_benchmark"]:
 #         PHASE 3 — FINE-TUNING EXPERIMENT  (mBERT → Sentence-BERT-style)
 # ════════════════════════════════════════════════════════════════════════════
 #  Adds one row to the headline benchmark by fine-tuning an mBERT-class
-#  encoder with MultipleNegativesRankingLoss on a stratified 70/30 train/test
-#  split, then evaluating on the test set. The same test set is re-evaluated
+#  encoder with MultipleNegativesRankingLoss on a landmark-grouped train/test
+#  split (GroupShuffleSplit, 30% of landmarks to test, seed 42), then
+#  evaluating on the test set. The same test set is re-evaluated
 #  zero-shot for *all* models in CONFIG["models"] so the comparison is
 #  apples-to-apples (same N_test). Produces:
 #      table6_finetune_vs_zeroshot.{png,pdf}
@@ -3693,20 +3705,20 @@ if CONFIG.get("run_finetuning") and CONFIG["run_benchmark"]:
 
     # ════════════════════════════════════════════════════════════════════════
     # ── NEW: Table 3b — Overall benchmark in reference-image style ─────────
-    # Columns: Model | MRR | nDCG@10 | GeoAcc@1 | GeoAcc@5 | GeoAcc@10
+    # Columns: Model | MRR | nDCG@10 | Recall@1 | Recall@5 | Recall@10
     # Rows:    one per zero-shot model (BM25, mBERT, XLM-R, LaBSE, …)
     # Best value per column bold + highlighted (matching reference image)
     # ════════════════════════════════════════════════════════════════════════
     print("\n[Render] Table 3b — Overall benchmark (reference-image style)")
 
     # Metric columns matching the reference image exactly
-    # GeoAcc@k = Recall@k (they are identical — top-k hit rate)
+    # Recall@k = top-k hit rate
     _T3B_METRICS = [
         ("MRR",        "MRR"),
         ("nDCG@10",    "nDCG@10"),
-        ("GeoAcc@1",   "Recall@1"),   # GeoAcc@k ≡ Recall@k in this benchmark
-        ("GeoAcc@5",   "Recall@5"),
-        ("GeoAcc@10",  "Recall@10"),
+        ("Recall@1",   "Recall@1"),
+        ("Recall@5",   "Recall@5"),
+        ("Recall@10",  "Recall@10"),
     ]
     _T3B_DISPLAY_COLS = ["Model"] + [d for d, _ in _T3B_METRICS]
     _T3B_INTERNAL     = [k for _, k in _T3B_METRICS]
@@ -3765,7 +3777,7 @@ if CONFIG.get("run_finetuning") and CONFIG["run_benchmark"]:
         fontsize=7, fontweight="bold", color=C_NAVY, pad=6, loc="left",
         wrap=True)
     ax.text(0, 0.96,
-            "GeoAcc@k ≡ Recall@k (fraction of queries with correct doc in top-k). "
+            "Recall@k (fraction of queries with correct doc in top-k). "
             "Bold = best per column.",
             transform=ax.transAxes, fontsize=5.5, color=C_MGREY, style="italic")
 
@@ -3777,16 +3789,16 @@ if CONFIG.get("run_finetuning") and CONFIG["run_benchmark"]:
     # ════════════════════════════════════════════════════════════════════════
     # ── NEW: Table 5b — Zero-shot vs fine-tuned in reference-image style ───
     # Columns: Metric | Zero-shot | Fine-tuned | Improvement (Δ)
-    # Rows:    MRR, GeoAcc@1, GeoAcc@5, GeoAcc@10
+    # Rows:    MRR, Recall@1, Recall@5, Recall@10
     # Matches reference image Table 5 exactly
     # ════════════════════════════════════════════════════════════════════════
     print("[Render] Table 5b — Zero-shot vs fine-tuned (reference-image style)")
 
     _T5B_METRICS = [
         ("MRR",       "MRR"),
-        ("GeoAcc@1",  "Recall@1"),
-        ("GeoAcc@5",  "Recall@5"),
-        ("GeoAcc@10", "Recall@10"),
+        ("Recall@1",  "Recall@1"),
+        ("Recall@5",  "Recall@5"),
+        ("Recall@10", "Recall@10"),
     ]
 
     # Best zero-shot result per metric (across all baselines on the TEST pool)
@@ -3871,13 +3883,13 @@ if CONFIG.get("run_finetuning") and CONFIG["run_benchmark"]:
     # ════════════════════════════════════════════════════════════════════════
     # ── NEW: Table 6b — Cross-lingual breakdown after fine-tuning ──────────
     # Matches reference image Table 6 exactly:
-    # Columns: Language Group | N | MRR | GeoAcc@1 | GeoAcc@5
+    # Columns: Language Group | N | MRR | Recall@1 | Recall@5
     # Rows:    English, Indian vernaculars (red), European, Others
     # Indian vernaculars row coloured red (matching reference image)
     # ════════════════════════════════════════════════════════════════════════
     print("[Render] Table 6b — Cross-lingual breakdown after fine-tuning")
 
-    _T6B_COLS    = ["Language Group", "N", "MRR", "GeoAcc@1", "GeoAcc@5"]
+    _T6B_COLS    = ["Language Group", "N", "MRR", "Recall@1", "Recall@5"]
     _T6B_METRICS = ["MRR", "Recall@1", "Recall@5"]
 
     _t6b_data   = []
@@ -3953,7 +3965,7 @@ if CONFIG.get("run_finetuning") and CONFIG["run_benchmark"]:
             f"{ft_label.replace('FT-','')} on GeoQueryCA (N\u2009=\u2009{N_test:,}).",
             fontsize=7, fontweight="bold", color=C_NAVY, pad=6, loc="left")
         ax.text(0, 0.96,
-                "GeoAcc@k \u2261 Recall@k.  "
+                "Recall@k = top-k hit rate.  "
                 "Red rows: Indian vernaculars.  Bold = best per column.",
                 transform=ax.transAxes, fontsize=5.5,
                 color=C_MGREY, style="italic")
