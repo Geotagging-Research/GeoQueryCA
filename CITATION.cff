@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software or dataset, please cite it as below."
-title: "GeoQueryCA: A Multilingual Benchmark for Cross-Lingual Geographic Query Retrieval"
+title: "GeoQueryCA: A Multilingual, Context-Aware Dataset for Geotagging, Geographic Disambiguation, and Retrieval Benchmarking"
 authors:
   - family-names: "Sahoo"
     given-names: "Madhusmita"
@@ -11,8 +11,8 @@ authors:
   - family-names: "Banerjee"
     given-names: "Tanvi"
     affiliation: "Wright State University"
-version: 1.0.0
-date-released: 2026-08-18
+version: 1.1.0
+date-released: 2026-11-07
 license: "MIT"
 repository-code: "https://github.com/Geotagging-Research/GeoQueryCA"
 keywords:
@@ -23,7 +23,7 @@ keywords:
   - benchmark dataset
 preferred-citation:
   type: article
-  title: "GeoQueryCA: A Multilingual Benchmark for Cross-Lingual Geographic Query Retrieval"
+  title: "GeoQueryCA: A Multilingual, Context-Aware Dataset for Geotagging, Geographic Disambiguation, and Retrieval Benchmarking"
   authors:
     - family-names: "Sahoo"
       given-names: "Madhusmita"
